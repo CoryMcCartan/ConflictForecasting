@@ -1,0 +1,74 @@
+body {
+	background-color: #aaa;
+	margin: 0;
+	font-family: "Libre Baskerville", serif;
+}
+header {
+	position: fixed;
+	top: -2px;
+	width: 100%;
+	font-size: 48px;
+	padding: 16px;
+	background-color: #f7f7f7;
+	box-shadow: 0 0 16px #777;
+	z-index: 100;
+}
+a#header {
+	color: black;
+	text-decoration: none;
+}
+button.back {
+	border: none;
+	outline: none;
+	font-size: 36px;
+	padding: 16px;
+	margin-right: 32px;
+	font-family: "Libre Baskerville", serif;
+	float: right;
+	background-color: #0d0;
+	transition: all 200ms;
+}
+button.back:hover {
+	cursor: pointer;
+	color: white;
+}
+
+section.content {
+	width: 90%;
+	min-height: 4in;
+	border: 1px solid #777;
+	box-shadow: 0 0 8px #888;
+	position: absolute;
+	top: 144px;
+	left: 5%;
+	background-color: #fcfcfc;
+	z-index: 5;
+	font-size: 12pt;
+	padding: 0.5in;
+	box-sizing: border-box;
+}
+section.content:after {
+    position: absolute;
+    content: "";
+    bottom: -32px;
+    height: 32px;
+    width: 1px;
+}
+
+p {
+	text-indent: 0.25in;
+	margin: 0;
+}
+h1 {
+	font-size: 2.5em;
+	text-align: center;
+}
+h2 {
+	font-size: 1.4em;
+}
+a, a:visited {
+	margin-bottom: 2px;
+	margin-left: 0.125in;
+	color: #47f;
+	font-weight: bold;
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Help</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css" href="styles/help.css">
+		<link rel="stylesheet" type="text/css" href="styles/fonts.css">
+	</head>
+	<body>
+		<a href="#contents" id="header">
+			<header>
+				Help
+				<a href="index.html">
+					<button class="back">Back</button>
+				</a>
+			</header>
+		</a>
+		<section class="content">
+			<h1>ConflictForecaster&trade; Help</h1>
+			<h2 id="contents">Contents</h2>
+				<a href="#files">Working with Files</a>			<br />
+				<a href="#players">Managing Players</a>			<br />
+				<a href="#layout">Customizing Page Layout</a>	<br />
+				<a href="#special">Special Game Options</a>		<br />
+			<h2 id="files">Working with Files</h2>
+				<p>	The "New" button creates a new, blank, file. </p>
+				<p>	The "Open" button opens a previously created file.
+				<p>	The "Save" button saves the current file.  If the file has not yet been saved, a prompt will be displayed asking for a file name. </p>
+				<p>	The "Save As" button allows the current file to be saved again under a different name. </p>
+				<p>	The "Manage Files" button shows a dialog where previously created files can be deleted. </p>
+				<p>	The "Delete File" button shows deletes the current file from storage and clears the screen. </p>
+				<p>	The "Import" button imports a file as text. </p>
+				<p>	The "Share" button shares a file as text. </p>
+			<h2 id="players">Managing Players</h2>
+				<p>
+					Pressing "Add Player" creates a new entry in the player table, which can be edited freely.  All numeric values must be between 0 and 100.
+				</p>
+				<p>
+					Pressing "Remove Player" removes the player where the cursor is, or, 
+					if there is no cursor in a player entry, removes the last player in the table.  
+					Player deletion cannot be undone. 
+				</p>
+				<p>
+					Pressing "Clear All" removes all players.  This action cannot be undone.
+				</p>
+			<h2 id="layout">Customizing Page Layout</h2>
+				<p>
+					Clicking the various buttons on this tab will hide or show their corresponding sections on the page.
+					The notes section is a place for typing notes or analysis about the file.
+				</p>
+				<p> Pressing "Print" will print the page.  To save as a PDF, use the "Save as PDF" printer option in the print dialog.</p>
+			<h2 id="special">Special Game Options</h2>
+				<p>
+					The "Shock Salience" button sets the probability that a given player will be given an entirely new salience value on a given round.
+				</p>
+				<p>
+					The "Force Length" button fixes the number of bargaining rounds before the simulation begins.
+				</p>
+				<p>
+					The "Default Value" button sets the position value that will be used if a player vetoes the agreement, or if no agreement can be reached.
+				</p>
+				<p>
+					The "Add Scale Point" button creates a new scale point, which is a text label for a given position value.  
+					When the final outcome is determined, the label with the closest position value is selected to represent the outcome.
+					To have the software select the text labels when it runs the forecast, ensure that the "Scale" button is selected in the page tab.  
+					To hide the scale section for printing, simply click the "Scale" button again before printing but after running the forecast.
+				</p>
+		</section>
+	</body>
+</html>
