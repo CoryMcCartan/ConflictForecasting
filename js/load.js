@@ -6,7 +6,7 @@ $(document).ready(function() {
 	$(".loading").fadeIn(150);
 	setTimeout(load, 250); // force DOM refresh, causing page to white-out while scripts run.
 	
-	$.get("user.license", function(data) {
+	$.get("license.json", function(data) {
 		window.license = JSON.parse(data);
 	});
 	window.currentFile = new File();
