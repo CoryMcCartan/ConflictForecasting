@@ -275,7 +275,7 @@ function File() {
 	this.scale = {};
 	this.notes = "";
 	this.defaultResult = -1;
-	this.creator = window.license;
+	this.creator = window.license.name;
 }
 
 /**

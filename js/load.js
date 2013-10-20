@@ -25,7 +25,9 @@ $(document).ready(function() {
 function load() {
 	document.querySelector("watermark-label").innerHTML += ", " + new Date().toLocaleDateString(); // add date to watermark
 	$($("control-tab[title~=File]")[0].$S("#title")).click(); // set file tab as default
-	$("soft")
+	$("software-license").html(function(index, old) {
+		return old.replace("$NAME$", window.license.name);
+	});
 	
 	// event handlers
 	$(".title").bind("keyup blur", rename);
