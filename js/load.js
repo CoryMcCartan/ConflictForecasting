@@ -4,13 +4,15 @@
 $(document).ready(function() {
 	$("body *").fadeOut(0);
 	$(".loading").fadeIn(150);
-	setTimeout(load, 250); // force DOM refresh, causing page to white-out while scripts run.
+	setTimeout(load, 200); // force DOM refresh, causing page to white-out while scripts run.
 	
-	$.get("license.json", function(data) {
-		window.license = JSON.parse(data);
-	});
+	try {
+		window.license = JSON.parse(storageGet("license"));
+	} catch(e) { // no storage key
+		window.license = {name: "", organization: ""};
+	}
 	window.currentFile = new File();
-	window.backupFile = duplicate(currentFile); // copy of what was saved lsat
+	window.backupFile = duplicate(currentFile); // copy of what was saved last
 	window.global = {
 		hasBeenSaved: false, // has it ever been saved
 		currentPlayerID: 0, // the player ID of the next player added
@@ -25,8 +27,10 @@ $(document).ready(function() {
 function load() {
 	document.querySelector("watermark-label").innerHTML += ", " + new Date().toLocaleDateString(); // add date to watermark
 	$($("control-tab[title~=File]")[0].$S("#title")).click(); // set file tab as default
-	$("software-license").html(function(index, old) {
-		return old.replace("$NAME$", window.license.name);
+	$("software-license, watermark-label").html(function(index, old) {
+		old = old.replace("$NAME$", window.license.name);
+		old = old.replace("$ORGANIZATION$", window.license.organization);
+		return old;
 	});
 	
 	// event handlers

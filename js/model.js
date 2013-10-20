@@ -35,6 +35,11 @@ function weightedMeanAverage() {
 	return weightedPositionSum / weightSum;
 }
 
+
+function solveDecisionTree() {
+	
+}
+
 /**
  * Check if players will veto the agreemetn
  */
