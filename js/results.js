@@ -40,7 +40,7 @@ function createRoundByRoundPositions() {
 	var table = document.createElement("table");
 		table.className = "roundByRound";
 		table.style.width = "calc(" + 4 * (length(game.snapshots) + 1) + "em + 232px)"; // 4 em per column plus 240px for first column
-	table.insertRow(-1).insertCell(-1).innerHTML = "Round:"; // upper-left  cell
+	table.insertRow(-1).insertCell(-1).innerHTML = "Bargaining Round:"; // upper-left  cell
 	
 	for (var i in game.players) { // names
 		var row = table.insertRow(-1);

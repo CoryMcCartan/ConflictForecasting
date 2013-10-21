@@ -263,7 +263,7 @@
 		position: fixed;
 		top: 8px;
 		right: 4px;		
-		z-index: 75;
+		z-index: 125;
 	}
 
 	software-copyright {
@@ -331,6 +331,9 @@
 	div.scalePoint > input#value, div.scalePoint > input#label {
 		border: none;
 		font-family: 'Libre Baskerville', monospace;
+	}
+	div.scalePoint > input#label {
+		width: 5.5in;
 	}
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
