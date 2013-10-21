@@ -140,14 +140,14 @@ function createScalePoint() {
 		scaleValue.max = "100";
 		scaleValue.value = "0";
 		scaleValue.onkeyup = updateScale;
-		var labelV = document.createElement("label");
-		labelV.innerHTML = "Position: ";
+	/*	var labelV = document.createElement("label");
+		labelV.innerHTML = "Position: "; */
 	var scaleLabel = document.createElement("input"); // value of scale point
 		scaleLabel.id = "label";
 		scaleLabel.type = "text";
 		scaleLabel.onkeyup = updateScale;
-		var labelL = document.createElement("label");
-		labelL.innerHTML = "Label: ";
+	/*	var labelL = document.createElement("label");
+		labelL.innerHTML = "Label: "; */
 	var deleteButton = document.createElement("button");
 		deleteButton.innerHTML = "-";
 		deleteButton.className = "deleteScale";
@@ -155,9 +155,9 @@ function createScalePoint() {
 			$(scalePoint).remove(); // remove the container element
 			updateScale(); // update scale to notice removed element
 		};
-	scalePoint.appendChild(labelV); // scaleValue label
+//	scalePoint.appendChild(labelV); // scaleValue label
 	scalePoint.appendChild(scaleValue); // scaleValue element
-	scalePoint.appendChild(labelL); // scaleLabel label
+//	scalePoint.appendChild(labelL); // scaleLabel label
 	scalePoint.appendChild(scaleLabel); // scaleLabel element
 	scalePoint.appendChild(deleteButton); // button to delte 
 	

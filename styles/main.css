@@ -159,6 +159,7 @@
 	table.roundByRound tr:first-child td:first-child {
 		text-align: right;
 		font-style: italic;
+		font-weight: normal;
 		color: #444;
 	}
 
@@ -184,13 +185,16 @@
 	}
 	div.scalePoint input#value {
 		width: 64px;
-		padding: 2px 4px;
+		border-left: none;
 		z-index: 20;
 	}
 	div.scalePoint input {
-		width: 400px;
-		border: 1px solid #aaa;
+		width: 5.5in;
+		border: none;
 		font-family: 'Libre Baskerville', monospace;
+		background-color: #f0f0f0;
+		padding: 2px 4px;
+		border-left: 1px solid #aaa;
 	}
 	div.scalePoint label {
 		margin-left: 16px;
@@ -328,12 +332,10 @@
 	div.scalePoint {
 		margin-top: -2px;
 	}
-	div.scalePoint > input#value, div.scalePoint > input#label {
-		border: none;
-		font-family: 'Libre Baskerville', monospace;
-	}
-	div.scalePoint > input#label {
-		width: 5.5in;
+	div.scalePoint > input {
+		background-color: transparent;
+		border-left: none;
+		padding: 0;
 	}
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
