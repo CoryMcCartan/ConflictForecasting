@@ -6,6 +6,7 @@ function setUpFile() {
 	$(".title").html(currentFile.name);
 	// players
 	var table = document.querySelector("table#players");
+	var maxID = 0;
 	for (var ID in currentFile.players) {
 		var player = currentFile.players[ID];
 		var tr = table.insertRow(-1); // add row at end
@@ -17,19 +18,24 @@ function setUpFile() {
 			var value = player[parameter]; // get value
 			switch (parameter) { // format values
 				case "name":
+					cell.innerHTML = value; // put value in cell
 					break;
 				case "veto":
 					value = value ? "Yes" : "No"; // replace T/F with Y/N
+					cell.innerHTML = value; // put value in cell
 					break;
 				default:
 					value *= 100; // put on 100-pt scale
-					value = round(value, 1);
+					cell.innerHTML = value.toFixed(1); // round put value in cell
 					break;
 			}
-			cell.innerHTML = value; // put value in cell
 			index++;
 		}
+		
+		maxID = Math.max(ID, maxID); // update max. ID reached
 	}
+	global.currentPlayerID = maxID + 1;
+	
 	// shock salience and force length
 	if (currentFile.shockSalience !== -1) { // shock salience
 		var button = getButton("Shock Salience")[0]; // find button
