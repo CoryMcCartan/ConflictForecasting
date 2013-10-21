@@ -182,11 +182,19 @@ function clear() {
 	currentFile = new File();
 	$(".title").html(null); // clear title
 	$("section#resultsSummary > div").html(null); // clear results
+	$("section#roundByRound > div").html(null); // clear results
+	$("section#forecastGraph > div").html(null); // clear results
+	$("section#scale > div").html(null); // clear scale
+	$("section#notes > div").html(null); // clear notes
 	if (visible("section#resultsSummary")) { // hide results
 		getButton("Results Summary").click(); 
 	}
-	$("section#scale > div").html(null); // clear scale
-	$("section#notes > div").html(null); // clear notes
+	if (visible("section#roundByRound")) { // hide results
+		getButton("Round-by-Round Positions").click(); 
+	}
+	if (visible("section#forecastGraph")) { // hide results
+		getButton("Forecast Graph").click(); 
+	}
 	global.hasBeenSaved = false;
 }
 /**

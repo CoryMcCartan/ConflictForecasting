@@ -5,6 +5,7 @@
 		margin: 0;
 		padding: 0;
 		-webkit-user-select: none;
+		overflow-x: hidden;
 	}
 	body * { outline: none;}
 	
@@ -42,6 +43,7 @@
 
 	tab-group {
 		z-index: 100;
+		position: absolute;
 	}
 	tab-button, toggle-button {
 		float: left;
@@ -133,12 +135,39 @@
 	table#players tr > th:last-child {
 		border-right: none;
 	}
+	table#players tr > td:first-child {
+		font-weight: bold;
+	}
+	
+	table.roundByRound {
+		border-collapse:collapse;
+	}
+	table.roundByRound td {
+		border-bottom: 2px solid #777;
+		width: 5em;
+		text-align: right;
+		padding: 2px 0;
+	}
+	table.roundByRound tr > td:first-child {
+		text-align: left;
+		font-weight: bold;
+		width: 232px;
+	}
+	table.roundByRound tr:first-child td {
+		font-weight: bold;
+	}
+	table.roundByRound tr:first-child td:first-child {
+		text-align: right;
+		font-style: italic;
+		color: #444;
+	}
 
 	div.page > section {
 		margin-top: 16px;
 		border-top: 2px solid #aaa;
 		padding: 0 0.125in;
 		font-size: 0.8em;
+		page-break-inside: avoid;
 	}
 	section#resultsSummary > div {
 		font-size: 0.95em;
@@ -290,6 +319,10 @@
 	
 	div.page > section {
 		border-top: 2px solid transparent;
+	}
+	
+	section#roundByRound > div > div {
+		overflow-x: visible !important;
 	}
 	
 	div.scalePoint {

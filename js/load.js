@@ -1,3 +1,5 @@
+google.load("visualization", "1", {packages:["corechart"]});
+
 /**
  * After file has loaded, set flags, set up file, and start event handlers
  */
@@ -160,14 +162,18 @@ function length(object) {
  */
 function duplicate(object) {
 	var copy = {};
-	for (var i in object) {
-		var value = object[i];
-		if (typeof value === "object") {
-			value = duplicate(value); // recursive clone
+	if (typeof object === "object" && object !== null) {
+		for (var i in object) {
+			var value = object[i];
+			if (typeof value === "object") {
+				value = duplicate(value); // recursive clone
+			}
+			copy[i] = value;
 		}
-		copy[i] = value;
+		return copy;
+	} else {
+		return object;
 	}
-	return copy;
 }
 
 /**
@@ -189,6 +195,16 @@ function equals(objectA, objectB) {
 function round(number, decimalPlaces) {
 	var factor = Math.pow(10, decimalPlaces);
 	return Math.round(number * factor) / factor;
+}
+/**
+ * Rounds a number, including trailing 0s
+ * @param {Number} number the number
+ * @param {Number} decimalPlaces the number of decimal places to round to
+ * @returns {Number} the rounded number
+ */
+function roundFix(number, decimalPlaces) {
+	var rounded =round(number, decimalPlaces);
+	return rounded.toFixed(decimalPlaces);
 }
 
 /**

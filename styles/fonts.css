@@ -10,3 +10,9 @@
   font-weight: 700;
   src: local('Libre Baskerville Bold'), local('LibreBaskerville-Bold'), url(libreBaskervilleBold.woff) format('woff');
 }
+@font-face {
+  font-family: 'Libre Baskerville';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Libre Baskerville Italic'), local('LibreBaskerville-Italic'), url(libreBaskervilleItalic.woff) format('woff');
+}

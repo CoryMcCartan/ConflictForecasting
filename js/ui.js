@@ -23,6 +23,7 @@ function setUpFile() {
 					break;
 				default:
 					value *= 100; // put on 100-pt scale
+					value = round(value, 1);
 					break;
 			}
 			cell.innerHTML = value; // put value in cell
@@ -34,16 +35,28 @@ function setUpFile() {
 		var button = getButton("Shock Salience")[0]; // find button
 		button.turnOn(); // turn on
 		button.$S(".label").innerHTML += " (" + currentFile.shockSalience * 100 + "%)"; // add percentage to label
+	} else { 
+		var button = getButton("Shock Salience")[0]; // find button
+		button.turnOff();
+		button.$S(".label").innerHTML = "Shock Salience";
 	}
 	if (currentFile.forceLength !== -1) { // force length
 		var button = getButton("Force Length")[0]; // find button
 		button.turnOn(); // turn on
 		button.$S(".label").innerHTML += " (" + currentFile.forceLength + ")"; // add length to label
+	} else { 
+		var button = getButton("Force Length")[0]; // find button
+		button.turnOff();
+		button.$S(".label").innerHTML = "Force Length";
 	}
 	if (currentFile.defaultResult !== -1) { // default result
 		var button = getButton("Default Result")[0]; // find button
 		button.turnOn(); // turn on
 		button.$S(".label").innerHTML += " (" + currentFile.defaultResult + ")"; // add length to label
+	} else { 
+		var button = getButton("Default Result")[0]; // find button
+		button.turnOff();
+		button.$S(".label").innerHTML = "Default Result";
 	}
 	$("section#notes > div").html(currentFile.notes); // fill notes section
 	if (length(currentFile.scale) > 0) { // fill in scale
@@ -58,6 +71,8 @@ function setUpFile() {
 	}
 	global.hasBeenSaved = true; // since we loaded the file from memory, it has already been saved to memory, obviously
 	window.backupFile = duplicate(currentFile);
+	
+	$("control-tab[title~=Game]")[0].$S("#title").click(); // open game tab
 }
 
 /**
@@ -142,6 +157,8 @@ function createScalePoint() {
 	
 	$("section#scale > div")[0].appendChild(scalePoint);
 	
+	scaleValue.focus();
+	
 	return scalePoint; // for functions that want immediate access to values
 }
 /**
@@ -194,25 +211,25 @@ function updateValues(td) {
 		case "position":
 			if (value > 100) value = 100;
 			if (value < 0) value = 0;
-			td.innerHTML = parseFloat(value);  // if it went out of range, replace the value with the in-range one
+			td.innerHTML = parseFloat(value).toFixed(1);  // if it went out of range, replace the value with the in-range one
 			value /= 100; // scale down to 1
 			break;
 		case "influence":
 			if (value > 100) value = 100;
 			if (value < 0) value = 0;
-			td.innerHTML = parseFloat(value);  // if it went out of range, replace the value with the in-range one
+			td.innerHTML = parseFloat(value).toFixed(1);  // if it went out of range, replace the value with the in-range one
 			value /= 100; // scale down to 1
 			break;
 		case "salience":
 			if (value > 100) value = 100;
 			if (value < 0) value = 0;
-			td.innerHTML = parseFloat(value);  // if it went out of range, replace the value with the in-range one
+			td.innerHTML = parseFloat(value).toFixed(1);  // if it went out of range, replace the value with the in-range one
 			value /= 100; // scale down to 1
 			break;
 		case "flexibility":
 			if (value > 100) value = 100;
 			if (value < 0) value = 0;
-			td.innerHTML = parseFloat(value);  // if it went out of range, replace the value with the in-range one
+			td.innerHTML = parseFloat(value).toFixed(1);  // if it went out of range, replace the value with the in-range one
 			value /= 100; // scale down to 1
 			break;
 		case "veto":

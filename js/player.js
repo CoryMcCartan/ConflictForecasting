@@ -25,7 +25,9 @@ Player.defaultValues = {"name": "", "position": 0, "influence": 0, "salience": 0
 function generatePlayerID() {
 	return global.currentPlayerID++; // return and then increment the id
 }
-
+/**
+ * Set salience shock chane
+ */
 function shockSalience() {
 	var icon = this.$S(".icon");
 	if (!icon.className.match("off")) { // button is on
@@ -46,7 +48,9 @@ function shockSalience() {
 		icon.parentElement.querySelector(".label").innerHTML = "Shock Salience"; // remove percentage from label
 	}
 }
-
+/**
+ * Set length of negotiations
+ */
 function forceLength() {
 	var icon = this.$S(".icon");
 	if (!icon.className.match("off")) { // button is on
@@ -65,5 +69,29 @@ function forceLength() {
 	} else { // turned off
 		currentFile.forceLength = -1; // don't force length
 		icon.parentElement.querySelector(".label").innerHTML = "Force Length"; // remove length from label
+	}
+}
+
+/**
+ * Create 2-D array of N ^ (some max level)
+ * @param {number} level the number of dimensions
+ * @param {number} defaultValue the default value to fill
+ */
+function createGameArray(level, defaultValue) { // recursive
+	if (typeof game === "undefined") return; // undefined, forecast not run yet
+	if (level > 0) {
+		var array = {};
+		var newLevel = level - 1;
+		var smaller = duplicate(createGameArray(newLevel, defaultValue));
+		for (var i in game.players) {
+			array[i] = duplicate(smaller); // prevent linkage errors
+		}
+		return array;
+	} else {
+		if (typeof defaultValue !== "undefined") { // default value was set
+			return defaultValue;
+		} else {
+			return null;
+		}
 	}
 }
