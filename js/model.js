@@ -1,3 +1,6 @@
+/**
+ * Run forecast
+ */
 function runForecast() {
 	if (length(currentFile.players) === 0) { // no players, no data, no forecast
 		dialog("OK", "Error", "No players added.");
@@ -47,8 +50,6 @@ function runForecast() {
 		$("control-tab[title~=Page]")[0].$S("#title").click(); // open page tab
 	});
 }
-
-
 
 
 /**
@@ -201,7 +202,7 @@ function calculateExpectedUtilities() {
 			var playerJ = game.players[j];
 			
 			var utilitiesI = utilities[i][j];
-			var Q = 1 - playerI.flexibility;
+			var Q = 1 - playerJ.flexibility;
 			var T = (Math.abs(playerI.position - game.medianPosition) < Math.abs(playerI.position - playerJ.position)) ? 1 : 0; //  T = 1 if J's move helps I
 			
 			var challenge = playerJ.salience * (probabilities[i][j] * utilitiesI.success + (1 - probabilities[i][j]) * utilitiesI.failure)
@@ -349,7 +350,7 @@ function calculateNewPositions() {
 		
 		if (mostEnforceableOffer === null) { // no offers
 			newPositions[i] = positionI; // no change
-		} else if (mostEnforceableOffer.enforceability / bestOffer.enforceability > 1.01) { // the bad but powerful offer is too much more powerful than the best
+		} else if (mostEnforceableOffer.enforceability / bestOffer.enforceability > 1.1) { // the bad but powerful offer is too powerful comparted to the best
 			newPositions[i] = mostEnforceableOffer.newPosition;
 		} else { // choose the one that is best for
 			newPositions[i] = bestOffer.newPosition;

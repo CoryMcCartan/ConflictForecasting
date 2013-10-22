@@ -65,12 +65,14 @@ function createRoundByRoundPositions() {
 function createForecastGraph() {
 	var dataLength = length(game.snapshots) + 1;
 	var array = new Array(dataLength);
-	array[0] = ["Round", "Forecast"];
+	array[0] = ["Round", "Median Position", "Forecast"];
 	var ticks = new Array(dataLength - 1);
 	for (var i = 1; i < dataLength; i++) {
 		var forecast = game.snapshots[i - 1].weightedMeanAverage;
 		forecast = round(100 * forecast, 2);
-		array[i] = [i, forecast];
+		var median = game.snapshots[i - 1].medianPosition;
+		median = round(100 * median, 2);
+		array[i] = [i, median, forecast];
 		ticks[i - 1] = i;
 	}
 	var data = google.visualization.arrayToDataTable(array);
@@ -80,12 +82,11 @@ function createForecastGraph() {
 	var options = {
 		width: inchesCF * 7.5,
 		height: inchesCF * 4,
-		chartArea:{left: 56, top: 24, width: "75%", height: "85%"},
+		chartArea:{left: 56, top: 24, width: "70%", height: "85%"},
 		vAxis: {minValue: 0, maxValue: 100, title: "Policy Position"},
 		hAxis: {ticks: ticks, title: "Bargaining Round", format: "##"},
 		fontName: "Libre Baskerville",
-		colors: ["#c00"],
-		lineWidth: 3
+		series: {0: {color: "#aaa", lineWidth: 2}, 1: {color:"#c00", lineWidth: 4}}
 	};
 
   var chart = new google.visualization.LineChart(document.querySelector("section#forecastGraph > div"));
