@@ -1,14 +1,16 @@
 {
-  "name": "ConflictForecaster",
-  "description": "Forecasts the outcome of conflicts using game theory.",
-  "version": "0.1",
-  "app": {
-    "background": {
-      "scripts": ["js/background.js"]
-    }
-  },
-  "icons": { "128": "logo.png" },
-  "permissions": [
-	  "storage"
-  ]
+	"name": "ConflictForecaster",
+	"description": "Forecasts the outcome of conflicts using game theory.",
+	"author": "Cory McCartan",
+	"version": "1.0",
+	"short_name": "CF",
+	"app": {
+		"background": {
+			"scripts": ["js/background.js"]
+		}
+	},
+	"icons": { "128": "logo.png" },
+	"permissions": [
+		"storage"
+	]
 }

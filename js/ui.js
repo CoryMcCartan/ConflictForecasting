@@ -2,13 +2,14 @@
  * Set up the UI after a file has been opened
  */
 function setUpFile() {
+	currentFile.addScenario = new File().addScenario; // compability
 	// title
 	$(".title").html(currentFile.name);
 	// players
 	var table = document.querySelector("table#players");
 	var maxID = 0;
-	for (var ID in currentFile.players) {
-		var player = currentFile.players[ID];
+	for (var ID in currentFile.f.players) {
+		var player = currentFile.f.players[ID];
 		var tr = table.insertRow(-1); // add row at end
 		tr.setAttribute("playerID", ID);
 		addPlayerCells(tr); // set up event handlers, etc for all of the cells
@@ -37,37 +38,37 @@ function setUpFile() {
 	global.currentPlayerID = maxID + 1;
 	
 	// shock salience and force length
-	if (currentFile.shockSalience !== -1) { // shock salience
+	if (currentFile.f.shockSalience !== -1) { // shock salience
 		var button = getButton("Shock Salience")[0]; // find button
 		button.turnOn(); // turn on
-		button.$S(".label").innerHTML += " (" + currentFile.shockSalience * 100 + "%)"; // add percentage to label
+		button.$S(".label").innerHTML += " (" + currentFile.f.shockSalience * 100 + "%)"; // add percentage to label
 	} else { 
 		var button = getButton("Shock Salience")[0]; // find button
 		button.turnOff();
 		button.$S(".label").innerHTML = "Shock Salience";
 	}
-	if (currentFile.forceLength !== -1) { // force length
+	if (currentFile.f.forceLength !== -1) { // force length
 		var button = getButton("Force Length")[0]; // find button
 		button.turnOn(); // turn on
-		button.$S(".label").innerHTML += " (" + currentFile.forceLength + ")"; // add length to label
+		button.$S(".label").innerHTML = "Force Length (" + currentFile.f.forceLength + ")"; // add length to label
 	} else { 
 		var button = getButton("Force Length")[0]; // find button
 		button.turnOff();
 		button.$S(".label").innerHTML = "Force Length";
 	}
-	if (currentFile.defaultResult !== -1) { // default result
+	if (currentFile.f.defaultResult !== -1) { // default result
 		var button = getButton("Default Result")[0]; // find button
 		button.turnOn(); // turn on
-		button.$S(".label").innerHTML += " (" + currentFile.defaultResult + ")"; // add length to label
+		button.$S(".label").innerHTML = "Default Result (" + currentFile.f.defaultResult + ")"; // add length to label
 	} else { 
 		var button = getButton("Default Result")[0]; // find button
 		button.turnOff();
 		button.$S(".label").innerHTML = "Default Result";
 	}
-	$("section#notes > div").html(currentFile.notes); // fill notes section
+	$("section#notes > div").html(currentFile.f.notes); // fill notes section
 	if (length(currentFile.scale) > 0) { // fill in scale
 		getButton("Scale")[0].turnOn(); // turn on button
-		$("section#scale").show(); // show the section
+		setState("section#scale", true); // show the section
 		
 		for (var position in currentFile.scale) {
 			var point = createScalePoint();
@@ -75,10 +76,31 @@ function setUpFile() {
 			$(point).find("input#label").val(currentFile.scale[position]); // fill with label
 		}
 	}
+	if (length(currentFile.scenarios) > 1) { // fill in scenario selector
+		setState("#scenario", true); // show scenario selector
+		
+		var selector = $("select#scenarioSelect");
+		selector.html(null);
+		for (var name in currentFile.scenarios) {
+			var option = document.createElement("option");
+			option.innerHTML = name;
+			
+			if (currentFile.scenarioName === name)  {
+				option.selected = true;
+			}
+			
+			selector.append(option);
+		}
+		
+		$("div#description").html(currentFile.f.description);
+	} else {
+		setState("#scenario", false);
+	}
 	global.hasBeenSaved = true; // since we loaded the file from memory, it has already been saved to memory, obviously
 	window.backupFile = duplicate(currentFile);
 	
 	$("control-tab[title~=Game]")[0].$S("#title").click(); // open game tab
+	$(".content").get(0).scrollTop = 0; // scroll to top
 }
 
 /**
@@ -91,15 +113,17 @@ function addPlayer() {
 	var playerID = generatePlayerID();
 	tr.setAttribute("playerID", playerID);
 	var player = new Player();
-	currentFile.players[playerID] = player;
+	currentFile.f.players[playerID] = player;
 	
 	addPlayerCells(tr);
 }
 
 /**
  * Remove a player
+ * @param {boolean} uiOnly don't delete the  memory
  */
-function removePlayer() {
+function removePlayer(uiOnly) {
+	if (uiOnly === undefined) uiOnly = false;
 	var rowID = global.selectedRowID; //  row ID of the player to be removed
 	var playerID = global.selectedPlayerID; //  row ID of the player to be removed
 	var rows = $("table#players tr");
@@ -108,7 +132,7 @@ function removePlayer() {
 		playerID = rows[rowID].getAttribute("playerID"); // the most recently added ID
 	}
 	rows[rowID].remove(); // delete row
-	delete currentFile.players[playerID]; // delete player
+	if (uiOnly) delete currentFile.f.players[playerID]; // delete player
 	global.selectedPlayerID = -1;  // no one is selected
 	global.selectedRowID = -1;  // no one is selected
 }
@@ -129,7 +153,7 @@ function clearAll() {
  */
 function createScalePoint() {
 	getButton("Scale")[0].turnOn(); // turn on button
-	$("section#scale").show(); // show the section
+	setState("section#scale", true); // show the section
 	
 	var scalePoint = document.createElement("div"); // container element
 		scalePoint.className = "scalePoint";
@@ -140,14 +164,10 @@ function createScalePoint() {
 		scaleValue.max = "100";
 		scaleValue.value = "0";
 		scaleValue.onkeyup = updateScale;
-	/*	var labelV = document.createElement("label");
-		labelV.innerHTML = "Position: "; */
 	var scaleLabel = document.createElement("input"); // value of scale point
 		scaleLabel.id = "label";
 		scaleLabel.type = "text";
 		scaleLabel.onkeyup = updateScale;
-	/*	var labelL = document.createElement("label");
-		labelL.innerHTML = "Label: "; */
 	var deleteButton = document.createElement("button");
 		deleteButton.innerHTML = "-";
 		deleteButton.className = "deleteScale";
@@ -155,9 +175,7 @@ function createScalePoint() {
 			$(scalePoint).remove(); // remove the container element
 			updateScale(); // update scale to notice removed element
 		};
-//	scalePoint.appendChild(labelV); // scaleValue label
 	scalePoint.appendChild(scaleValue); // scaleValue element
-//	scalePoint.appendChild(labelL); // scaleLabel label
 	scalePoint.appendChild(scaleLabel); // scaleLabel element
 	scalePoint.appendChild(deleteButton); // button to delte 
 	
@@ -178,6 +196,40 @@ function updateScale() {
 		currentFile.scale[position] = label; // match position with label;
 	});
 }
+
+/**
+ * Change the current scenario
+ */
+function changeScenario() {
+	var index = $("select#scenarioSelect").get(0).selectedIndex;
+	var name = $("option").get(index).innerHTML; // get name of selected option
+	
+	var scenario = currentFile.scenarios[name];
+	
+	currentFile.f = scenario;
+	currentFile.scenarioName = name;
+	
+	clear(true);
+	setUpFile();
+}
+/**
+ * Delete the current scenario
+ */
+function deleteScenario() {
+	var index = $("select#scenarioSelect").get(0).selectedIndex;
+	var name = $("option").get(index).innerHTML; // get name of selected option
+	
+	if (name === "Main") return; // can't delete default
+	
+	$("option").eq(index).remove(); // delete
+	
+	delete currentFile.scenarios[name]; // delete data
+	currentFile.f = currentFile.scenarios["Main"];
+	currentFile.scenarioName = "Main";
+	
+	changeScenario(); // update
+}
+
 /**
  * Set a default result
  */
@@ -190,14 +242,14 @@ function setDefault() {
 		
 		dialog("OKC", "Default Result", html, function(response, root) {
 			if (response === "OK") { // OK
-				currentFile.defaultResult = parseFloat( root.querySelector("input#default").value );
-				getButton("Default Result")[0].$S(".label").innerHTML += " (" + currentFile.defaultResult + ")"; // add length to label
+				currentFile.f.defaultResult = parseFloat( root.querySelector("input#default").value );
+				getButton("Default Result")[0].$S(".label").innerHTML += " (" + currentFile.f.defaultResult + ")"; // add length to label
 			} else { // cancel
 				getButton("Default Result").click(); // make un-selected again
 			}
 		});
 	} else { // turned off
-		currentFile.defaultResult = -1; // don't have default result
+		currentFile.f.defaultResult = -1; // don't have default result
 		getButton("Default Result")[0].$S(".label").innerHTML = "Default Result";
 	}
 }
@@ -243,7 +295,7 @@ function updateValues(td) {
 			value = (value.toLowerCase() === "yes"); 
 			break;
 	}
-	var player = currentFile.players[playerID]; // get player frpm list
+	var player = currentFile.f.players[playerID]; // get player frpm list
 	player[category] = value; // set updated and formatted value
 }
 
@@ -305,7 +357,13 @@ function addPlayerCells(row) {
  * Show help.
  */
 function help() {
-	window.location.assign("help.html"); // load help page
+	chrome.app.window.create('help.html', {
+		'width': 720,
+		'height': 480,
+		'minWidth': 480,
+		'minHeight': 320
+	//	'frame': 'none'
+	});
 }
 
 
@@ -316,8 +374,10 @@ function help() {
  * @param {string} content
  * @param {function} callback the callback function, parameters are "yes"/"no"/"OK"/"cancel" for button press, as well as array all elements
  */
-function dialog(type, title, content, callback) {
+function dialog(type, title, content, callback, width) {
 	var dialog = document.createElement("dialog-box");
+	dialog.$S("div.dialog").style.width = (width || 360) + "px";
+	dialog.$S("div.dialog").style.left = ~~(window.innerWidth / 2 - (width || 360) / 2 - 32) + "px";
 	dialog.setAttribute("type", type);
 	if (typeof content === "string") {
 		dialog.innerHTML = content; // set innerHTML to string

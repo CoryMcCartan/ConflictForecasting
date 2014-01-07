@@ -14,32 +14,36 @@ function newFile() {
 function open() {
 	// check if should be saved
 	checkSave(function() {
-		var files = generateFileList();
-		// generate HTML list of files
-		var list = document.createElement("ul");
-		for (var i in files) {
-			var item = document.createElement("li");
-			item.innerHTML = i.substring(27); // get the file name (starts on character 27)
-			item.className = "fileObject"; // for styling
-			item.onclick = function() { // on click add class to show it's selected
-				$("ul > li.fileObject").removeClass("selected");
-				$(this).addClass("selected");
-			};
-			list.appendChild(item);
-		}
-		dialog("OKC", "Open File", list, function(response, root) {
-			if (response === "OK") {
-				var el = root.querySelector("ul > li.selected"); // the selected element
-				if (el === null) { // nothing selected;
-					return;
-				}
-
-				clear(); // clear file
-
-				var name = el.innerHTML; // the selected file name
-				currentFile = JSON.parse(storageGet(getFileKey(name))); // retrieve file and parse it into an object.
-				setUpFile();
+		generateFileList(function(files) {
+			// generate HTML list of files
+			var list = document.createElement("ul");
+			for (var i in files) {
+				var item = document.createElement("li");
+				item.innerHTML = i.substring(27); // get the file name (starts on character 27)
+				item.className = "fileObject"; // for styling
+				item.onclick = function() { // on click add class to show it's selected
+					$("ul > li.fileObject").removeClass("selected");
+					$(this).addClass("selected");
+				};
+				list.appendChild(item);
 			}
+			dialog("OKC", "Open File", list, function(response, root) {
+				if (response === "OK") {
+					var el = root.querySelector("ul > li.selected"); // the selected element
+					if (el === null) { // nothing selected;
+						return;
+					}
+
+					clear(); // clear file
+
+					var name = el.innerHTML; // the selected file name
+					var key = getFileKey(name);
+					storageGet(key, function(data) {
+						currentFile = JSON.parse(data[key]);
+						setUpFile();
+					}); // retrieve file and parse it into an object.
+				}
+			});
 		});
 	});
 }
@@ -74,50 +78,51 @@ function saveAs() {
  * Manage all files
  */
 function manageFiles() {
-	var files = generateFileList();
-	// generate HTML list of files
-	var html = document.createElement("span");
-	var list = document.createElement("ul");
-	for (var i in files) {
-		var item = document.createElement("li");
-		item.innerHTML = i.substring(27); // get the file name (starts on character 27)
-		item.className = "fileObject"; // for styling
-		item.onclick = function() { // on click add class to show it's selected
-			$("ul > li.fileObject").removeClass("selected");
-			$(this).addClass("selected");
-		};
-		list.appendChild(item);
-	}
-	html.appendChild(list);
-	html.appendChild(document.createElement("br")); // add line break
-	var deleteButton = document.createElement("button");
-	deleteButton.className = "red";
-	deleteButton.innerHTML = "Delete";
-	deleteButton.onclick = function() {
-		dialog("YN", "Delete File", "Are you sure you would like to delete the selected file?", function(response) {
-			if (response === "yes") {
-				var el = $("ul > li.selected")[0];
-				el.setAttribute("delete","yes"); // mark the current selection for deletion
-				$(el).hide(); // hide it
-			}
-		});
-	};
-	html.appendChild(deleteButton);
-	
-	dialog("OKC", "Manage Files", html, function(response, root) {
-		if (response === "OK") {
-			$("ul > li[delete]").each(function(inx, el) {
-				var fileName = el.innerHTML;
-				storageDelete(getFileKey(fileName));
-				if (fileName === currentFile.fileName) { // deleted the currently opened file
-					clear(); // clear current file
+	generateFileList(function(files) {
+		// generate HTML list of files
+		var html = document.createElement("span");
+		var list = document.createElement("ul");
+		for (var i in files) {
+			var item = document.createElement("li");
+			item.innerHTML = i.substring(27); // get the file name (starts on character 27)
+			item.className = "fileObject"; // for styling
+			item.onclick = function() { // on click add class to show it's selected
+				$("ul > li.fileObject").removeClass("selected");
+				$(this).addClass("selected");
+			};
+			list.appendChild(item);
+		}
+		html.appendChild(list);
+		html.appendChild(document.createElement("br")); // add line break
+		var deleteButton = document.createElement("button");
+		deleteButton.className = "red";
+		deleteButton.innerHTML = "Delete";
+		deleteButton.onclick = function() {
+			dialog("YN", "Delete File", "Are you sure you would like to delete the selected file?", function(response) {
+				if (response === "yes") {
+					var el = $("ul > li.selected")[0];
+					el.setAttribute("delete","yes"); // mark the current selection for deletion
+					$(el).hide(); // hide it
 				}
 			});
-		} else { // cancel
-			$("ul > li[delete]").each(function(inx, el) {
-				el.removeAttribute("delete"); // clear deletion mark
-			});
-		}
+		};
+		html.appendChild(deleteButton);
+
+		dialog("OKC", "Manage Files", html, function(response, root) {
+			if (response === "OK") {
+				$("ul > li[delete]").each(function(inx, el) {
+					var fileName = el.innerHTML;
+					storageDelete(getFileKey(fileName));
+					if (fileName === currentFile.fileName) { // deleted the currently opened file
+						clear(); // clear current file
+					}
+				});
+			} else { // cancel
+				$("ul > li[delete]").each(function(inx, el) {
+					el.removeAttribute("delete"); // clear deletion mark
+				});
+			}
+		});
 	});
 }
 
@@ -160,8 +165,6 @@ function importFile() {
 		});
 	});
 }
-
-
 /**
  * Share the file as text
  */
@@ -169,42 +172,74 @@ function share() {
 	var text = JSON.stringify(currentFile); // text is JSON stringified version of current file
 	var div = document.createElement("div");
 		div.className = "code"; // appropriate styling
-		div.innerHTML = text; // fill with text
+		div.innerText = text; // fill with text
 	var html = "Text to share: " + div.outerHTML; 
 	dialog("OK", "Share", html);
 }
 
 /**
  * Internal function that actually clears the files
+ * @param {boolean} keepFile don't delete current file, only clear UI
  */
-function clear() {
-	clearAllPlayers();
-	currentFile = new File();
+function clear(keepFile) {
+	if (keepFile === undefined) keepFile = false;
+	clearAllPlayers(keepFile);
+	if (!keepFile) {
+		currentFile = new File();
+		global.hasBeenSaved = false;
+		$("select#scenarioSelect").html(null);
+		$("div#description").html(null);
+		if (visible("section#resultsSummary")) { // hide results
+			getButton("Results Summary").click(); 
+		}
+		if (visible("section#roundByRound")) { // hide results
+			getButton("Round-by-Round Data").click(); 
+		}
+		if (visible("section#forecastGraph")) { // hide results
+			getButton("Forecast Graph").click(); 
+		}
+	}
 	$(".title").html(null); // clear title
 	$("section#resultsSummary > div").html(null); // clear results
+	$("section#cost-benefit > div").html(null); // clear results
 	$("section#roundByRound > div").html(null); // clear results
 	$("section#forecastGraph > div").html(null); // clear results
 	$("section#scale > div").html(null); // clear scale
 	$("section#notes > div").html(null); // clear notes
-	if (visible("section#resultsSummary")) { // hide results
-		getButton("Results Summary").click(); 
-	}
-	if (visible("section#roundByRound")) { // hide results
-		getButton("Round-by-Round Positions").click(); 
-	}
-	if (visible("section#forecastGraph")) { // hide results
-		getButton("Forecast Graph").click(); 
-	}
-	global.hasBeenSaved = false;
 }
 /**
  * Internal function that clears all players
  */
 function clearAllPlayers() {
-	var players = length(currentFile.players);
+	var players = length(currentFile.f.players);
 	for (var i = 0; i < players; i++) { // remove players 1 by 1
 		removePlayer();
 	}
+}
+
+/**
+ * Create a new game scenario
+ */
+function newScenario() {
+	var html = "<input type='text' id='name' placeholder='Name' /><br /><textarea type='text' id='description' placeholder='Description'></textarea>";
+	dialog("OKC", "New Scenario", html, function(response, root) {
+		if (response === "OK") {
+			var name = root.querySelector("input#name").value; // get name
+			if (name === "") return; // needs a name
+			var description = root.querySelector("textarea").value.replace(/\n/g,"<br />"); // get description and format as HTML
+			
+			currentFile.addScenario(name, description);
+			var newOption = document.createElement("option");
+			newOption.innerHTML = name;
+			newOption.selected = true;
+			$("select#scenarioSelect").append(newOption);
+			
+			currentFile.f = scenario; // set active scenario
+			currentFile.scenarioName = name;
+			
+			changeScenario();
+		} else { } // cancel
+	});
 }
 
 /**
@@ -256,18 +291,20 @@ function checkSave(callback) {
 
 /**
  * Generates list of files in storage
- * @returns {Object} list of files
+ * @param {function} callback with list of files as object
  */
-function generateFileList() {
-	var keys = Object.keys(getStorageArea());
-	var files = {};
-	for (var i = 0; i < keys.length; i++) {
-		var key = keys[i];
-		if (key.match("Conflict Forecasting File: ")) { // proper label format
-			files[key] = localStorage[key];
-		} 
-	}
-	return files;
+function generateFileList(callback) {
+	getStorageArea(function(all) {
+		var keys = Object.keys(all);
+		var files = [];
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			if (key.match("Conflict Forecasting File: ")) { // proper label format
+				files.push(key);
+			} 
+		}
+		storageGet(files, callback);
+	});
 }
 
 /**
@@ -277,13 +314,28 @@ function generateFileList() {
 function File() {
 	this.name = "";
 	this.fileName = "";
+	this.scenarios = {"Main": new Scenario()};
+	this.f = this.scenarios["Main"];
+	this.scenarioName = "Main";
+	this.scale = {};
+	this.creator = window.license.name;
+	
+	this.addScenario = function(name, description) {
+		this.scenarios[name] = duplicate(this.f); // duplicate the current scenario under a new name
+		this.scenarios[name].description = description;
+	};
+}
+/**
+ * A possible game scenario
+ * @returns {Scenario} the scenario object
+ */
+function Scenario() {
+	this.description = "";
 	this.players = {}; // {"id": player}
 	this.shockSalience = -1; // don't shock salience
 	this.forceLength = -1; // don't force length;
-	this.scale = {};
 	this.notes = "";
 	this.defaultResult = -1;
-	this.creator = window.license.name;
 }
 
 /**
@@ -305,11 +357,11 @@ function getFileKey(name) {
 
 /**
  * Retrieve data from storage
- * @param {type} key the storage key
- * @returns {unresolved} the data
+ * @param {string} key the storage key
+ * @param {function} callback
  */
-function storageGet(key) {
-	return localStorage[key];
+function storageGet(key, callback) {
+	chrome.storage.local.get(key, callback);
 }
 /**
  * Send data to storage
@@ -317,19 +369,28 @@ function storageGet(key) {
  * @param {type} data the data to store
  */
 function storageSet(key, data) {
-	localStorage[key] = data;
+	var pair = {};
+	pair[key] = data;
+	
+	chrome.storage.local.set(pair, function() {
+		console.log("SET " + key + ", VALUE: " + data);
+		console.log( (chrome.runtime.lastError || {message: ""}).message ) ;
+	});
 }
 /**
  * Delete storage item
  * @param {type} key the storage key
  */
 function storageDelete(key) {
-	localStorage.removeItem(key);
+	chrome.storage.local.remove(key, function() {
+		console.log( (chrome.runtime.lastError || {message: ""}).message );
+	});
 }
 
 /**
  * Gets all data in storage
+ * @param {function} callback
  */
-function getStorageArea() {
-	return localStorage;
+function getStorageArea(callback) {
+	storageGet(null, callback);
 }

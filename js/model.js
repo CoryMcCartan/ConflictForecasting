@@ -2,13 +2,13 @@
  * Run forecast
  */
 function runForecast() {
-	if (length(currentFile.players) === 0) { // no players, no data, no forecast
+	if (length(currentFile.f.players) === 0) { // no players, no data, no forecast
 		dialog("OK", "Error", "No players added.");
 		return;
 	}
 	
 	window.game = {};
-	game.players = duplicate(currentFile.players);
+	game.players = duplicate(currentFile.f.players);
 	game.N = length(game.players);
 	game.weightedMeanAverage = weightedMeanAverage();
 	game.medianPosition = calculateMedianPosition();
@@ -30,7 +30,7 @@ function runForecast() {
 		
 		game.offers = makeOffers();
 		calculateNewPositions();
-		if (currentFile.shockSalience !== -1) {
+		if (currentFile.f.shockSalience !== -1) {
 			randomlyShockSalience();
 		}
 		
@@ -43,11 +43,13 @@ function runForecast() {
 	
 	checkVeto();
 	createResultsSummary();
-	createRoundByRoundPositions();
+	createRoundByRoundData();
 	createForecastGraph();
 	
 	dialog("OK","","Forecast Completed.", function() {
-		$("control-tab[title~=Page]")[0].$S("#title").click(); // open page tab
+		if (currentFile.f.shockSalience === -1) {
+			$("control-tab[title~=Page]")[0].$S("#title").click(); // open page tab
+		}
 	});
 }
 
@@ -368,7 +370,7 @@ function calculateNewPositions() {
  */
 function randomlyShockSalience() {
 	for (var i in game.players) {
-		if (Math.random() > currentFile.shockSalience) { // yes, shock salience
+		if (Math.random() > currentFile.f.shockSalience) { // yes, shock salience
 			game.players[i].salience = round(Math.random(), 2); // random new value
 		}
 	}
@@ -379,8 +381,8 @@ function randomlyShockSalience() {
  * @returns {Boolean} if game has ended
  */
 function gameEnded() {
-	if (currentFile.forceLength !== -1) {
-		if (game.round > currentFile.forceLength) {
+	if (currentFile.f.forceLength !== -1) {
+		if (game.round > currentFile.f.forceLength) {
 			return true;
 		} else {
 			return false;
@@ -400,19 +402,19 @@ function gameEnded() {
  */
 function checkVeto() {
 	for (var p in game.players) {
-		var player = currentFile.players[p]; // use original values
+		var player = currentFile.f.players[p]; // use original values
 		if (!game.players[p].veto) { // no veto power
 			continue; // skip to next player
 		}
 		
-		if (currentFile.defaultResult === -1) { // no default result
+		if (currentFile.f.defaultResult === -1) { // no default result
 			var range = player.flexibility;
 			if (Math.abs(player.position - game.weightedMeanAverage) > range) { // distance of value wanted from actual is greater than half flexibility
 				game.vetoes.push(player.name);
 			}
 		} else { // default result
 			var withoutVeto = Math.abs(player.position - game.weightedMeanAverage);
-			var withVeto = Math.abs(player.position - currentFile.defaultResult / 100);
+			var withVeto = Math.abs(player.position - currentFile.f.defaultResult / 100);
 			if (withVeto < withoutVeto) { // vetoing brings outcome closer to what the player wants
 				game.vetoes.push(player.name);
 			}

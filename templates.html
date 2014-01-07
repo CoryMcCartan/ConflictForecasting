@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+			* {
+				outline: none;
+				font-size: 12px;
+			}
+
+			div.tab {
+				width: 100%;
+				position: fixed;
+				top: calc(1em + 19px);
+				background-color: #f2f2f2;
+				left: 0;
+			}
+			.target {
+				background-color: #d00;
+				color: #000 !important; 
+			}
+			#title {
+				width: 92px;
+				color: #777;
+				font-size: 120%;
+				padding: 6px 8px;
+				position: absolute;
+				top: calc(-1em - 17px);
+				text-align: center;
+				transition: all 240ms;
+			}
+			#title:hover:not(.target) {
+				background-color: #ddd;
+			}
+
+			div.content {
+				margin-top: 0;
+				border-top: 4px solid #d00;
+				background-color: #fafafa;
+				box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
+				height: 148px;
+				padding: 8px 4px;
+				box-sizing: border-box;
+				overflow: hidden;
+			}
+
+			div.icon {
+				box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.12);
+				width: 72px;
+				height: 84px;
+				font-size: 60px;
+				line-height: 80px;
+				text-align: center;
+				border-radius: 1px;
+				transition: all 200ms;
+				margin-bottom: 2px;
+			}
+			div.button:not(.disabled):hover > div.icon {
+				opacity: 0.85;
+				-webkit-transform: scale(1.0375);
+				color: #fff !important;
+			}
+			div.button:not(.disabled):hover > span.label {
+				opacity: 0.50;
+			}
+			span.label {
+				width: 72px;
+				line-height: 1.08em;
+				font-size: 12px;
+				text-align: center;
+				font-weight: bold;
+				display: inline-block;
+				transition: all 200ms;
+			}
+			div.button, div.togglebutton {
+				cursor: pointer;
+				margin-left: 8px;
+			}
+			div.togglebutton {
+				font-weight: 600;
+				color: #222;
+			}
+			.off {
+				font-weight: bold;
+				font-style: italic;
+				background-color: #727272 !important;
+				box-shadow: inset 0 0 10px #444 !important;
+				color: white !important;
+			}
+
+			div.dialog {
+				width: 360px;
+				padding: 32px;
+				background-color: #fcfcfc;
+				border-radius: 2px;
+				border: 1px solid #aaa;
+				position: fixed;
+				top: calc(50% - 320px);
+				margin: 0 auto;
+				left: calc(50% - 196px);
+				box-shadow: 0 0 32px #aaa;
+				z-index: 200;
+			}
+
+			div.title {
+				font-weight: bold;
+				font-size: 150%;
+				width: 100%;
+				border-bottom: 2px solid #aaa;
+				margin-bottom: 8px;
+			}
+
+			div.screen {
+				z-index: 150;
+				position: fixed;
+				height: 100%;
+				width: 100%;
+				top: 0;
+				left: 0;
+				background-color: rgba(255, 255, 255, 0.5);
+			}
+
+			button#ok, button#cancel, button#yes, button#no {
+				border: 1px solid #aaa;
+				border-radius: 2px;
+				padding: 8px 0;
+				width: 108px;
+				font-family: "Segoe UI", "Courier New", monspace;
+				font-size: 12px;
+				cursor: pointer;
+				transition: all 150ms;
+				margin-top: 16px;
+			}
+			button#ok, button#yes {
+				background-color: #d00;
+				border: 1px solid #444;
+			}
+
+			button#ok:hover, button#yes:hover {
+				box-shadow: inset 0 0 6px #777;
+			}
+			button#cancel:hover, button#no:hover {
+				box-shadow: inset 0 0 6px #ccc;
+			}
+		</style>
+		<article>
+			<!-- CUSTOM ELEMENT TEMPLATES -->
+			<template id="tabtemplate">
+				<style></style>
+				<div class="tab">
+					<div id="title"></div>
+					<div class="content"><content></content></div>
+				</div>
+			</template>	
+
+			<template id="buttontemplate">
+				<style></style>
+				<div class="button">
+					<div class="icon"></div>
+					<span class="label"></span>
+				</div>
+			</template>
+
+			<template id="dialogtemplate">
+				<style></style>
+				<div class="screen"></div>
+				<div class="dialog">
+					<div class="title"></div>
+					<content></content>
+					<div class="actions">
+						<button id="yes">Yes</button>
+						<button id="no">No</button>
+						<button id="ok">OK</button>
+						<button id="cancel">Cancel</button>
+					</div>
+				</div>
+			</template>
+		</article>
+	</body>
+</html>

@@ -1,26 +1,66 @@
-google.load("visualization", "1", {packages:["corechart"]});
-
 /**
  * After file has loaded, set flags, set up file, and start event handlers
  */
-$(document).ready(function() {
-	$("body *").fadeOut(0);
-	$(".loading").fadeIn(150);
-	setTimeout(load, 200); // force DOM refresh, causing page to white-out while scripts run.
-	
-	try {
-		window.license = JSON.parse(storageGet("license"));
-	} catch(e) { // no storage key
-		window.license = {name: "", organization: ""};
+$(document).ready(function() { // when done AND loaded license
+	var link = $('link[rel="import"]')[0];
+	var template = link.import.querySelector("article");
+	var css = link.import.querySelector("style").innerHTML;
+	var templates = link.import.querySelectorAll("template");
+	for (var i = 0; i < templates.length; i++) {
+		templates[i].innerHTML = templates[i].innerHTML.replace("<style></style>", "<style>" + css + "</style>");
 	}
-	window.currentFile = new File();
-	window.backupFile = duplicate(currentFile); // copy of what was saved last
-	window.global = {
-		hasBeenSaved: false, // has it ever been saved
-		currentPlayerID: 0, // the player ID of the next player added
-		selectedRowID: -1, // the row ID of the currently selected player (-1 means no one has been selected)
-		selectedPlayerID: -1 // the player ID of the currently selected player (-1 means no one has been selected)
-	};
+	var content = template.cloneNode(true);
+	$("body")[0].appendChild(content);
+	templateSetup();
+	
+	storageGet("license", function(data) {
+		$(".loading").fadeIn(0);
+		setTimeout(load, 400); // force DOM refresh, causing page to white-out while scripts run.
+		
+		
+		if (equals(data, {})) {
+			var expirationDate = new Date();
+			expirationDate.setDate(expirationDate.getDate() + 7);
+			window.license = {name: "user", organization: "The United States of America", expiration: expirationDate};
+			var html = "Name: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n\
+							<input id='name' type='text' /><br />Organization: &nbsp;<input id='org' type='text' />";
+			dialog("OK", "Registration", html, function(response, root) {
+				license.name = root.querySelector("#name").value;
+				license.organization = root.querySelector("#org").value;
+				if (licensedUser()) {
+					license.expiration = "NEVER"; // never expires
+					dialog("OK", "Registration Complete", "Welcome, " + license.name + ".", function() { });
+				} else {
+					dialog("OK", "Trial Version", "You are not a registered user.  The software will expire in a week.", function() { });
+				}
+				storageSet("license", JSON.stringify(license));
+				
+				
+				$("software-license, watermark-label").html(function(index, old) {
+					old = old.replace("user", window.license.name);
+					old = old.replace("The United States of America", window.license.organization);
+					return old;
+				});
+			});
+		} else {
+			window.license = JSON.parse(data.license);
+			license.expiration = new Date(license.expiration); // parse date
+			
+			if (Date.now() > license.expiration) { // expired
+				$("div.expired").css("display", "block");
+				setTimeout(chrome.app.window.current().contentWindow.close, 5000); // close window in five seconds
+			}
+		}
+		
+		window.currentFile = new File();
+		window.backupFile = duplicate(currentFile); // copy of what was saved last
+		window.global = {
+			hasBeenSaved: false, // has it ever been saved
+			currentPlayerID: 0, // the player ID of the next player added
+			selectedRowID: -1, // the row ID of the currently selected player (-1 means no one has been selected)
+			selectedPlayerID: -1 // the player ID of the currently selected player (-1 means no one has been selected)
+		};
+	});
 });
 
 /** 
@@ -34,6 +74,10 @@ function load() {
 		old = old.replace("$ORGANIZATION$", window.license.organization);
 		return old;
 	});
+	onresize = function() {
+		$("div.content").css("height", innerHeight - 178 + "px");
+	};
+	onresize();
 	
 	// event handlers
 	$(".title").bind("keyup blur", rename);
@@ -47,27 +91,17 @@ function load() {
 	$("section#notes > div").bind("keyup", function() { 
 		var text = $(this).html(); // get text
 		text = text.replace(/--/g,"—"); // fix dashes
-		currentFile.notes = text; // save
+		currentFile.f.notes = text; // save
 	}); // save notes
 	$("section#notes > div").blur(function() {
-		$(this).html(currentFile.notes); // fix dashes
+		$(this).html(currentFile.f.notes); // fix dashes
 	});
-	$("close-button").click(function() {
-		close();
+	$("select#scenarioSelect").change(changeScenario);
+	$("#description").bind("keyup blur", function() {
+		var name = $("select#scenarioSelect").get(0).selectedOptions[0].innerHTML; // get name of selected option
+		currentFile.scenarios[name].description = this.innerHTML;
 	});
-	$("maximize-button").click(function() {
-		chrome.app.window.current().maximize();
-		$("restore-button").show();
-		$(this).hide();
-	});
-	$("restore-button").click(function() {
-		chrome.app.window.current().restore();
-		$("maximize-button").show();
-		$(this).hide();
-	});
-	$("minimize-button").click(function() {
-		chrome.app.window.current().minimize();
-	});
+	$("#deleteScenario").click(deleteScenario);
 	// normal butotns
 	getButton("New").click(newFile);
 	getButton("Open").click(open);
@@ -81,33 +115,52 @@ function load() {
 	getButton("Add Player").click(addPlayer);
 	getButton("Remove Player").click(removePlayer);
 	getButton("Clear All").click(clearAll);
-	getButton("Create Scale Point").click(createScalePoint);
+	getButton("New Scenario").click(newScenario);
 	getButton("Default Result").click(setDefault);
+	getButton("Create Scale Point").click(createScalePoint);
 	getButton("Shock Salience").click(shockSalience);
 	getButton("Force Length").click(forceLength);
 	getButton("Run Forecast").click(runForecast);
 	getButton("Print").click(function() {
+		$("div.content").css("height", "");
 		window.print();
+		onresize();
 	});
 	// toggle buttons
 	getButton("Player Table").click(function() { toggle("#playerTable"); });
 	getButton("Results Summary").click(function() { toggle("#resultsSummary"); });
-	getButton("Cost-Benefit Analysis").click(function() { toggle("#cost-benefit"); });
-	getButton("Round-by-Round Positions").click(function() { toggle("#roundByRound"); });
-	getButton("Forecast Graph").click(function() { toggle("#forecastGraph"); });
+	getButton("New Cost-Benefit Analysis").click(function() { createCostBenefitAnalysis(); });
+	getButton("Round-by-Round Data").click(function() { toggle("#roundByRound"); });
+	getButton("Forecast Graph").click(function() { toggle("#forecastGraph"); createForecastGraph(); });
 	getButton("Scale").click(function() { toggle("#scale"); });
 	getButton("Notes").click(function() { toggle("#notes"); });
 	
-	$("body *").fadeIn(1750);
 	$(".loading").fadeOut(500);
 	
 	// 0ms fast transition
+	toggle("#scenario", 0);
 	toggle("#resultsSummary", 0);
 	toggle("#cost-benefit", 0);
 	toggle("#roundByRound", 0);
 	toggle("#forecastGraph", 0);
 	toggle("#scale", 0);
 	$("restore-button").hide();
+}
+
+/**
+ * Checks to see if user is in database
+ * @returns {boolean} true if licensed
+ */
+function licensedUser() {
+	var registeredUsers = [
+		{"name": "Cory McCartan", "organization": "Sammamish High School"}
+	];
+	
+	var matches = $.grep(registeredUsers, function(user) {
+		return (user.name === license.name && user.organization.toUpperCase() === license.organization.toUpperCase()); // perfect name match, organization match
+	});
+	
+	return (matches.length === 1); // having only one maatch will result in OK, otherwise fraud
 }
 
 /**
@@ -238,9 +291,27 @@ function selectElementContents(el) {
  * @param {Number} duration ms
  */
 function toggle(selector, duration) {
-	if (duration === 0) { // not defined
-		$(selector).toggle();
-	} else {
-		$(selector).toggle(175);
+	if (duration !== 0) duration = 200;
+	var state = $(selector).css("opacity") === "0";
+	$(selector).css("display", "block");
+	setTimeout(function() { // small delay for proper display
+		$(selector).css("opacity", state ? "1" : "0");
+	}, 10);
+	if (!state) {
+		setTimeout(function() {
+			$(selector).css("display", "none");
+		}, duration);
 	}
+}
+
+/**
+ * Set selector visibility
+ * @param {string} selector CSS selector to select element(s) to toggle
+ * @param {boolean} state
+ */
+function setState(selector, state) {
+	$(selector).css("display", state ? "block" : "none");
+	setTimeout(function() { // small delay for proper display
+		$(selector).css("opacity", state ? "1" : "0");
+	}, 10);
 }
